@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ProjectNumeral } from "@/components/ui/ProjectNumeral";
 import { PullQuote } from "@/components/ui/PullQuote";
 import { Reveal } from "@/components/ui/Reveal";
-import { SecurityVisual } from "@/components/sections/SecurityVisual";
+// import { SecurityVisual } from "@/components/sections/SecurityVisual";
 import { projects } from "@/data/portfolio";
 import type { Project } from "@/types/portfolio";
 
