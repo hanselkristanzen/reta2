@@ -60,9 +60,9 @@ export function Projects() {
                 {mobile.title}
               </h3>
 
-              <div className="mt-9 aspect-[16/9] w-full overflow-hidden border border-line sm:aspect-[21/9]">
+              {/* <div className="mt-9 aspect-[16/9] w-full overflow-hidden border border-line sm:aspect-[21/9]">
                 <SecurityVisual />
-              </div>
+              </div> */}
 
               <div className="mt-10 grid gap-10 md:grid-cols-[1fr_260px]">
                 <div>
