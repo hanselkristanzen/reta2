@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+/* Touch has no hover; browsers fake one on tap and leave it stuck until
+   the next tap elsewhere. `can-hover:` is used in place of the plain
+   `hover:` variant throughout the codebase so every hover effect is
+   gated behind real hover capability (mobile-native). */
+@custom-variant can-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+/* Self-hosted variable fonts (no external requests at runtime) */
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+@theme {
+  /* ---- Color system ----
+     Warm, editorial ink-and-paper base. The accent (signal) is a muted
+     brass — used sparingly, as a signal rather than a brand wash — not
+     the reflexive "black + neon green" a security-portfolio prompt
+     tends to default to. Functional colors (wire/amber/crimson) are
+     semantic (severity levels), independent of the accent. */
+  --color-void: #0d0d0f;
+  --color-ink: #18181b;
+  --color-ink-raised: #212124;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.26);
+  --color-paper: #f2efe8;
+  --color-mist: #a39d92;
+  --color-mist-dim: #8f8977; /* WCAG AA (4.5:1+) against both void and ink */
+  --color-signal: #c2a24e;
+  --color-signal-dim: #9c8140;
+  --color-signal-soft: rgba(194, 162, 78, 0.12);
+  --color-wire: #6fa8c9;
+  --color-wire-soft: rgba(111, 168, 201, 0.12);
+  --color-amber: #d38a4a;
+  --color-amber-soft: rgba(211, 138, 74, 0.14);
+  --color-crimson: #d9705f;
+  --color-crimson-soft: rgba(217, 112, 95, 0.14);
+
+  /* ---- Type system ---- */
+  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ---- Motion ----
+     Strong custom curves (emil-design-eng / apple-design): built-in CSS
+     easings are too weak for deliberate motion. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Named animations for the navigation overlay: fast and restrained.
+     Never scale(0) — nothing appears from nothing (emil-design-eng). */
+  --animate-fade-in: fade-in 220ms var(--ease-out) both;
+  --animate-menu-in: menu-in 300ms var(--ease-out) both;
+
+  /* ---- Layout ---- */
+  --breakpoint-xs: 22.5rem;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(4rem + env(safe-area-inset-top, 0px));
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%; /* no font inflation in landscape (mobile-native) */
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-paper);
+    font-family: var(--font-body);
+    font-feature-settings: "ss01" 1, "cv05" 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent; /* the loudest "this is a website" tell */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em; /* large display type wants negative tracking (apple-design) */
+  }
+
+  /* Every tappable element: no 300ms delay, no long-press text selection,
+     no lingering gray highlight — but body copy stays selectable. */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+
+  ::selection {
+    background-color: var(--color-signal);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Custom thin scrollbar, dark-themed */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-raised);
+    border-radius: 999px;
+    border: 2px solid var(--color-void);
+  }
+}
+
+/* ---- Entrance system ----
+   One quiet pattern for everything that scrolls into view: opacity plus a
+   10px rise, ease-out, ~360ms. Nothing blurs, nothing bounces, nothing
+   scrubs against scroll position (that blocks reading). Reduced motion
+   keeps the opacity change and drops the movement. */
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 360ms var(--ease-out),
+    transform 360ms var(--ease-out);
+}
+.reveal[data-reveal="in"] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transform: none;
+    transition: opacity 200ms ease;
+  }
+}
+
+/* ---- Hero intro (runs once on load) ----
+   Name lines rise from behind a mask; the portrait is unveiled top-down
+   while settling from a 6% overscale. Transform/clip-path only. */
+@keyframes hero-rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes plate-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+@keyframes plate-settle {
+  from {
+    transform: scale(1.06);
+  }
+}
+.hero-rise {
+  animation: hero-rise 640ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 60ms);
+}
+.hero-plate {
+  animation: plate-in 900ms var(--ease-in-out) 120ms both;
+}
+.hero-plate img {
+  animation: plate-settle 1100ms var(--ease-out) 120ms both;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility press-feedback {
+  transition: transform 140ms var(--ease-out);
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Respect reduced-motion system-wide: neutralise CSS transitions/animations
+   for anyone who has asked the OS for less motion. JS-driven effects
+   (GSAP, Motion) are separately gated via usePrefersReducedMotion. Kept
+   gentle per apple-design/emil-design-eng: comprehension-aiding opacity
+   and color transitions survive; movement does not. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
