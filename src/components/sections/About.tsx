@@ -22,7 +22,7 @@ export function About() {
           <Reveal>
             <ScrollReveal
               containerClassName=""
-              textClassName="max-w-2xl text-xl leading-relaxed text-paper sm:text-2xl md:text-3xl"
+              textClassName="max-w-2xl text-lg leading-normal text-paper sm:text-xl md:text-2xl"
               baseOpacity={0.15}
               blurStrength={3}
             >
